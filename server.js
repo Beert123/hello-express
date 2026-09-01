@@ -1,10 +1,12 @@
 import express from 'express';
+import cors from 'cors';
 
 import { todos } from './Data/data.js';
 
 const server = express();
 const port = 3000;
 
+server.use(cors());
 server.use(express.json());
 
 server.get('/', (req, res) => {
@@ -28,20 +30,51 @@ server.post('/todos', (req, res) => {
 });
 
 server.get('/todos/:id', (req, res) => {
-  console.log(req.params);
-  res.send(req.params.todos);
+  const todoId = Number(req.params.id);
+  const todo = todos.find(t => t.id === todoId);
+  if(!todo){
+    return res.status(404).json({
+      message: "ToDo not found"
+    });
+  }
+  res.json(todo);
 });
 
 server.put('/todos', (req, res) => {
   res.send('PUT todos');
 });
 
+server.put('/todos/:id', (req, res) => {
+  const toDoId = Number(req.params.id);
+  const todo = todos.find(todo => todo.id === toDoId);
+
+  if(!todo){
+    return res.status(404).json({
+      message: "ToDo not found"
+    });
+  }
+  Object.assign(todo, req.body);
+  res.json(todo);
+
+});
+
 server.patch('/todos', (req, res) => {
   res.send('PATCH todos');
 });
 
-server.delete('/todos', (req, res) => {
-  res.send('DELETE todos');
+server.delete('/todos/:id', (req, res) => {
+  const toDoId = Number(req.params.id);
+  const todo = todos.find(todo => todo.id === toDoId);
+
+  if(!todo){
+    return res.status(404).json({
+      message: "ToDo not found"
+    });
+  }
+  const index = todos.indexOf(todo);
+  todos.splice(index, 1);
+
+  res.status(204).send("ToDo deleted successfully");
 });
 
 
